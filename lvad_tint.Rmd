@@ -1,0 +1,1040 @@
+---
+title: "GIB in LVAD supported patients"
+subtitle: "Research Letter"
+author: "Salil Deo"
+date: "`r Sys.Date()`"
+output: tint::tintHtml
+
+
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+
+gi bleeding on lvad support. trends and resource utilization
+
+```{r get all dataframes, echo = FALSE, message = FALSE, warning = FALSE}
+
+library(tidyverse);library(tidylog);library(haven);library(broom);library(survey)
+library(srvyr);library(skimr);library(tidyr);library(tableone);library(janitor)
+
+c10 <- read_sas("G:/lvad_gib/c2010_2.sas7bdat") # 2010
+
+c11 <- read_sas("G:/lvad_gib/c2011_2.sas7bdat") # 2011
+
+c12 <- read_sas('G:/lvad_gib/c2012_2.sas7bdat') # 2012
+
+c13 <- read_csv("G:/lvad_gib/append13.csv") # 2013
+
+c14 <- read_csv("G:/lvad_gib/append14.csv") # 2014
+
+c15 <- read_csv("G:/lvad_gib/append15.csv") # 2015
+```
+
+get the important variables selected for each year and then to append them to create a single large dataframe for data modification and data analysis
+
+```{r 2010}
+
+
+
+glimpse(c10)
+
+names(c10) <- tolower(names(c10)) # change all var names to lowercase
+
+
+c10.1 <- c10 %>%
+  select(age,  amonth,  aweekend, died, discwt, dispuniform, totchg,
+dqtr,   dx1, dx2, dx3,dx4, dx5, dx6, dx7, dx8, dx9, dx10, 
+dxccs1, dxccs2, dxccs3, dxccs4, dxccs5,  female, 
+hospid,  key, los, nis_stratum,  pay1,orproc,  pr1, pr2, pr3, pr4, pr5,  prccs1, prccs2,
+prccs3, prccs4, prccs5, race, totchg,  year, zipinc_qrtl, lvad)
+
+
+
+# get the original severity file from that year
+
+s10 <- read_sas("G:/nis_2010_severity.sas7bdat")
+
+names(s10) <- tolower(names(s10))
+
+# then we will only select "cm" variables and "nis_stratum".
+
+s10_s <- s10 %>% select(key, cm_aids:cm_wghtloss)
+
+m10 <- left_join(c10.1, s10_s, by = "key")
+
+glimpse(m10)
+
+```
+
+
+```{r 2011}
+
+glimpse(c11)
+
+names(c11) <- tolower(names(c11)) # change all var names to lowercase
+
+
+c11.1 <- c11 %>%
+  select(age,  amonth,  aweekend, died, discwt, dispuniform, totchg,
+dqtr,   dx1, dx2, dx3,dx4, dx5, dx6, dx7, dx8, dx9, dx10, 
+dxccs1, dxccs2, dxccs3, dxccs4, dxccs5,  female, 
+hospid,  key, los, nis_stratum,  pay1,orproc,  pr1, pr2, pr3, pr4, pr5,  prccs1, prccs2, 
+prccs3, prccs4, prccs5, race, totchg,  year, zipinc_qrtl, lvad)
+
+# get the original core file from that year
+
+s11 <- read_sas("G:/nis_2011_severity.sas7bdat")
+
+names(s11) <- tolower(names(s11))
+
+# then we will only select "cm" variables and "nis_stratum".
+
+
+
+s11_s <- s11 %>% select(key, cm_aids:cm_wghtloss)
+
+m11 <- left_join(c11.1, s11_s, by = "key")
+
+glimpse(m11)
+
+```
+
+
+```{r 2012}
+
+glimpse(c12)
+
+names(c12) <- tolower(names(c12)) # change all var names to lowercase
+
+
+c12.1 <- c12 %>%
+  select(age,  amonth,  aweekend, died, discwt, dispuniform, totchg, 
+dqtr,   dx1, dx2, dx3,dx4, dx5, dx6, dx7, dx8, dx9, dx10, 
+dxccs1, dxccs2, dxccs3, dxccs4, dxccs5,  female, 
+hosp_nis,  key_nis, los, nis_stratum,  pay1,orproc,  pr1, pr2, pr3, pr4, pr5,  prccs1, prccs2, 
+prccs3, prccs4, prccs5, race, totchg,  year, zipinc_qrtl, lvad)
+
+
+# get the original core file from that year
+
+s12 <- read_stata("G:/NIS_2012_Severity.dta")
+
+names(s12) <- tolower(names(s12))
+
+# then we will only select "cm" variables and "nis_stratum".
+
+
+s12_s <- s12 %>% select(key_nis, cm_aids:cm_wghtloss)
+
+m12 <- left_join(c12.1, s12_s, by = "key_nis")
+
+glimpse(m12)
+```
+
+```{r 2013}
+
+glimpse(c13)
+
+names(c13) <- tolower(names(c13)) # change all var names to lowercase
+
+
+c13.1 <- c13 %>%
+  select(age,  amonth,  aweekend, died, discwt, dispuniform, totchg,
+dqtr,   dx1, dx2, dx3,dx4, dx5, dx6, dx7, dx8, dx9, dx10, 
+dxccs1, dxccs2, dxccs3, dxccs4, dxccs5,  female, 
+hosp_nis,  key_nis, los, nis_stratum,  pay1,orproc,  pr1, pr2, pr3, pr4, pr5,  prccs1, prccs2, 
+prccs3, prccs4, prccs5, race, totchg,  year, zipinc_qrtl, lvad)
+
+# get the original core file from that year
+
+s13 <- read_stata("G:/NIS_DATA/nis2013/NIS_2013_Severity.dta")
+
+names(s13) <- tolower(names(s13))
+
+# then we will only select "cm" variables and "nis_stratum".
+
+
+s13_s <- s13 %>% select(key_nis, cm_aids:cm_wghtloss)
+
+m13 <- left_join(c13.1, s13_s, by = "key_nis")
+
+glimpse(m13)
+
+```
+
+
+```{r 2014}
+
+glimpse(c14)
+
+names(c14) <- tolower(names(c14)) # change all var names to lowercase
+
+
+c14.1 <- c14 %>%
+  select(age,  amonth,  aweekend, died, discwt, dispuniform, totchg,
+dqtr,   dx1, dx2, dx3,dx4, dx5, dx6, dx7, dx8, dx9, dx10, 
+dxccs1, dxccs2, dxccs3, dxccs4, dxccs5,  female, 
+hosp_nis,  key_nis, los, nis_stratum,  pay1,orproc,  pr1, pr2, pr3, pr4, pr5,  prccs1, prccs2, 
+prccs3, prccs4, prccs5, race, totchg,  year, zipinc_qrtl, lvad)
+
+# get the original core file from that year
+
+s14 <- read_stata("G:/NIS_2014_Severity.dta")
+
+names(s14) <- tolower(names(s14))
+
+# then we will only select "cm" variables and "nis_stratum".
+
+
+s14_s <- s14 %>% select(key_nis, cm_aids:cm_wghtloss)
+
+m14 <- left_join(c14.1, s14_s, by = "key_nis")
+
+glimpse(m14)
+```
+
+
+
+```{r 2015}
+
+glimpse(c15)
+
+names(c15) <- tolower(names(c15)) # change all var names to lowercase
+
+
+c15.1 <- c15 %>%
+  select(age,  amonth,  aweekend, died, discwt, dispuniform, totchg,
+dqtr,   dx1, dx2, dx3,dx4, dx5, dx6, dx7, dx8, dx9, dx10, 
+dxccs1, dxccs2, dxccs3, dxccs4, dxccs5,  female, 
+hosp_nis.x,  key_nis, los, nis_stratum,  pay1,orproc,  pr1, pr2, pr3, pr4, pr5,  prccs1, prccs2, 
+prccs3, prccs4, prccs5, race, totchg,  year, zipinc_qrtl, lvad)
+
+c15.1 <- c15.1 %>% filter(amonth < 10)
+
+
+# get the original core file from that year
+
+s15 <- read_stata("G:/NIS_2015Q1Q3_Severity.dta")
+
+names(s15) <- tolower(names(s15))
+
+# then we will only select "cm" variables and "nis_stratum".
+
+
+s15_s <- s15 %>% select(key_nis, cm_aids:cm_wghtloss)
+
+m15 <- left_join(c15.1, s15_s, by = "key_nis")
+
+glimpse(m15)
+
+```
+
+appending all dataframes to create one large dataframe:
+
+```{r appending all dataframes together}
+
+# first need to change var names for few var to common
+# then append
+
+m10 <- m10 %>% rename(hosp_nis = hospid, key_nis = key)
+
+m11 <- m11 %>% rename(hosp_nis = hospid, key_nis = key)
+
+m15 <- m15 %>% rename(hosp_nis = hosp_nis.x)
+
+
+# append
+
+df <- rbind(m10, m11, m12, m13, m14, m15) # dataframe for all years 2010 - 2015
+
+glimpse(df)
+
+```
+
+1. create standard variables and do some data munging to create new variables
+
+2. seperate dataframe into quarters for each year to determine prop of admissions for each quarter and then prop of gib for each quarter
+
+3. determine basic trends and outcome for gib admissions when compared to other admission types
+
+4. determine resource utilization procedures performed, blood transfusion and transfer to acute rehab etc for gib patients
+
+5. also provide those admissions that result in transplant , however would be very small I think 
+
+6. use only gib as primary diagnosis for admission = hence most important cause for admission
+
+```{r}
+
+gib <- as.character(c('53100','53101','53120', '53121', '53140', '53141', '53160', '53161', '53200', '53201',
+'53220', '53221', '53240', '53241','53260', '53261', '53300', '53301', '53320', '53321',
+'53340', '53341', '53360', '53361', '53400', '53401', '53420', '53421', '53440', '53441',
+'53460', '53461', '153',"5781","5789",'53783',"56985",
+'4550', '4551', '4552', '4553', '4554', '4555', '4556', '4557', '4558', '4559',"53541", "56982"))
+
+df$gib <- with(df, ifelse((dx1 %in% gib | dx2 %in% gib), 1, 0))
+
+df %>% count(gib) # count of admissions for primary gi bleeding in the entire cohort
+```
+
+
+
+```{r divide df into quarters of study}
+
+
+                      
+                      
+df$qrtr[df$amonth %in% 1:3] <- "a"
+df$qrtr[df$amonth %in% 4:6] <- "b"
+df$qrtr[df$amonth %in% 7:9] <- "c"
+df$qrtr[df$amonth %in% 10:12] <- "d"
+
+df %>% count(qrtr) # created quarter of admissions for each year
+
+df <- df %>% tidyr::drop_na(qrtr)
+
+df %>% count(year) # determined data on year of admissions
+
+df$year_n <- df$year
+
+df <- df %>% unite(time, year, qrtr)
+
+df %>% count(time)
+
+
+write_csv(df, "G:/lvad_gib/df_touse.csv") # save the most updated df 
+```
+
+
+
+
+
+
+
+
+```{r create table one to determine differences between admissions for gib and other admissions}
+
+# will initially need to create and modify some variables
+
+
+df <- df %>% mutate(transf = fct_recode(factor(dispuniform),
+                                               "home" = "1",
+                                               "ltac" = "2",
+                                               "snf" = "5",
+                                               "hhc" = "6",
+                                              "died" = "20",
+                                               "ama" = "7"))
+
+
+df$transf[df$transf == "99"]<- NA
+
+
+df <- df %>% mutate(insur = fct_recode(factor(pay1),
+                    "medicare" = "1",
+                    "medicaid" = "2",
+                    "private" = "3",
+                    "self" = "4",
+                    "others" = "6"))
+
+
+df$insur[df$insur == "5"]<- NA
+
+
+df <- df %>% mutate(race_n = fct_recode(factor(race),
+                    "caucasian" = "1",
+                    "aa" = "2",
+                    "hispanic" = "3",
+                    "others" = "4",
+                    "others" = "6",
+                    "others" = "5"))
+
+df %>% count(race_n)
+
+df %>% count(insur)
+
+df %>% count(transf)
+
+write_csv(df, "G:/lvad_gib/df_touse.csv") # save the most updated df 
+```
+
+
+
+```{r af}
+
+af <- as.character(c("42731"))
+
+df$af <- with(df, ifelse((dx1 %in% af | dx2 %in% af | dx3 %in% af | dx4 %in% af | dx5 %in% af), 1, 0))
+
+df %>% count(af)
+```
+
+```{r }
+
+cns <- as.character(c("431","43411","0389","43491","7802",'43301', '43311', '43321', '43331',
+                      '43381', '43391', '4340', '43400', '43401', '4341',
+'43410', '43411', '4349', '43490', '43491',"7802","34660", "34661", "34662", "34663", "436", "430", "78097"))
+                
+
+df$cns <- with(df, ifelse((dx1 %in% cns | dx2 %in% cns | dx3 %in% cns), 1, 0))
+
+df %>% count(cns)
+
+```
+
+```{r infection}
+inf <- as.character(c('0380',
+'0381', '03810', '03811', '03812', '03819',          
+'03842',                  
+'03840', '03841', '03843', '03844', '03849',          
+'0031', '0202', '0223', '0362', '0382', '0383', '0545',      
+'0388',' 0389', '449', '77181', '7907', '99591', '99592',      
+'0200', '0208', '0209', '0218', '0219', '0228', '0229', '0230', '0231', '0232',
+'0233', '0238', '0239', '024', '025', '0260', '0269', '0270', '0271', '0272',
+'0278', '0279', '0300', '0301', '0302', '0303', '0308', '0309', '0312', '0318',
+'0319', '03289', '0329', '0330', '0331', '0338', '0339', '0341', '0363', '03681',
+'03689', '0369', '037', '0392', '0393', '0394', '0398', '0399', '0400', '0401',
+'0402', '0403', '04042', '04081', '04082', '04089', '0410', '04100', '04101', '04102',
+'04103', '04104', '04105', '04109', '0411', '04110', '04111', '04112', '04119', '0412',
+'0413', '0414', '04141', '04142', '04143', '04149', '0415', '0416', '0417', '0418',
+'04181', '04182', '04183', '04184', '04185', '04186', '04189', '0419', '390', '3929',
+'7953', '79531', '79539', 'V090', 'V091', 'V092', 'V093', 'V094', 'V0950', 'V0951',
+'V096', 'V0970', 'V0971', 'V0980', 'V0981', 'V0990', 'V0991', 'V1204', "78060", "99932"))   
+
+```
+
+
+
+```{r primary diagnosis infection}
+
+df$infection <- with(df,ifelse ((dx1 %in% inf | dx2 %in% inf | dx3 %in% inf | dx4 %in% inf | dx5 %in% inf), 1,0))
+
+df %>% count(infection) 
+```
+```{r acute respiratory failure}
+
+resp <- as.character(c('51881', '51884', "51881","49121","51884"))
+
+df$resp <- with(df, ifelse((dx1 %in% resp | dx2 %in% resp | dx3 %in% resp), 1, 0))
+
+df %>% count(resp)
+
+```
+
+
+```{r arrythmias}
+arry <- as.character(c('4270',  '4271','42731','42741', '42742', '4275','4272', '42789', '4279', '7850', '7851')) 
+
+df$arry <- with(df, ifelse((dx1 %in% arry | dx2 %in% arry), 1, 0)) 
+
+df %>% count(arry)
+```
+```{r}
+df$cause[df$cns == 1] <- "cns"
+df$cause[df$resp == 1]<- "resp"
+df$cause[df$gib == 1]<- "gib"
+df$cause[df$infection == 1]<- "infection"
+df$cause[df$arry == 1]<- "arry"
+
+df %>% count(cause)
+
+
+```
+
+
+```{r}
+library(tableone)
+
+vars <- c("age",  "transf", "insur","race_n", "infection","resp","arry",
+"female",  "los",  "totchg", "cm_anemdef",  "cm_bldloss", 
+"cm_chrnlung", "cm_coag",  "cm_dm", "cm_dmcx", "cm_htn_c", "cm_hypothy", "cm_liver",  "cm_lytes", "cm_mets", "cm_neuro", "cm_obese", "cm_para", "cm_perivasc", "af","cns",
+  "cm_renlfail",  "cm_ulcer", "cm_wghtloss",  "gib", "qrtr","totchg")
+
+factorvars = c(  "transf", "insur","race_n",  
+"female",   "cm_anemdef",  "cm_bldloss", "af","cns","infection","resp","arry",
+"cm_chrnlung", "cm_coag",  "cm_dm", "cm_dmcx", "cm_htn_c", "cm_hypothy", "cm_liver",  "cm_lytes", "cm_mets", "cm_neuro", "cm_obese", "cm_para", "cm_perivasc",  "cm_renlfail",  "cm_ulcer", "cm_wghtloss",  "gib", "qrtr")
+
+# create survey design object
+
+svyd <- survey::svydesign(data = df, nest = T, weights = ~discwt, strata = ~nis_stratum, ids = ~hosp_nis)
+
+options(survey.lonely.psu = "certainty")
+
+t1 <- tableone::svyCreateTableOne(vars = vars,factorVars = factorvars, strata = c("gib"),data = svyd,includeNA = FALSE)
+
+tableone <- print(t1)
+
+#write.csv(tableone, "G:/lvad_gib/table_one.csv")
+```
+
+```{r}
+df$cause[df$cns == 1] <- "cns"
+df$cause[df$resp == 1]<- "resp"
+df$cause[df$gib == 1]<- "gib"
+df$cause[df$infection == 1]<- "infection"
+df$cause[df$arry == 1]<- "arry"
+
+df %>% count(cause)
+```
+
+
+
+
+
+```{r create survey object}
+
+dfs <- df %>% srvyr::as_survey_design(weight = discwt, strata = nis_stratum, id = hosp_nis, nest = T)
+
+dfs
+
+options(survey.lonely.psu = "certainty")
+
+```
+
+
+```{r}
+
+# overall % of admissions for gib
+
+dfs %>%
+  summarise(total = survey_mean(gib, vartype = "ci"))
+
+
+# proportional trends for admissions for GIB per study period quarter
+
+gi_prop <- dfs %>% 
+  group_by(year_n) %>%
+  summarise(prop = survey_mean(gib, vartype = "ci", na.rm = T)) 
+   
+
+gib_total <- dfs %>%
+  group_by(year_n) %>%
+  summarise(total = srvyr::survey_total(gib, vartype = "ci", na.rm = TRUE))
+
+
+
+```
+
+
+
+```{r}
+ 
+gibonly <- df %>%
+  filter(gib == 1) 
+  
+gisurvey <- gibonly %>% srvyr::as_survey_design(weight = discwt, strata = nis_stratum, id = hosp_nis, nest = T)
+
+
+  
+gisurvey %>%
+  summarise(infection = survey_mean(infection))
+
+gisurvey %>%
+  summarise(cns = survey_mean(cns))
+
+gisurvey %>%
+  summarise(arry = survey_mean(arry))
+
+
+
+```
+
+primary procedures performed in the gib patients:
+
+```{r}
+
+gibonly %>%
+  count(pr1) %>%
+  arrange(desc(n))
+
+gibonly %>%
+   count(prccs1) %>%
+  arrange(desc(n))
+
+```
+
+45.13 = small bowel endoscopy NEC
+44.43 = endoscopic control of gastric bleeding
+99.04 = blood prbc transfusion
+45.23 = colonoscopy
+45.16 = ogdscopy with closed biopsy
+45.43 = endoscopic destruction of large intestine lesion
+45.34 = endoscopic destruction of small bowel lesions
+45.42 = endoscopic large bowel polyp removal
+43.41 = gastric polpys removal
+45.25 = closed large bowel biopsy
+38.97 = Cardiac catheter placement (swan, cvp line)
+38.93 = cvp line
+45.19 = small bowel diagnostic procedure nec
+88.72 = ECHO
+37.51 = transplant
+37.21 = RHC
+39.95 = hemodialysis
+39.98 = hemorhage control
+88.47 = CT angiogram of abdomen/pelvis
+45.30 = endoscopic lesion duodenal therapy
+45.14 = endoscopic biopsy of small intestine 
+17.33 = laprascopic right hemicolectomy
+37.98 = AICD change
+43.49 = local gastric desctruction NEC
+44.44 = transcatheter gastric embolization
+45.73 = right hemicolectomy
+88.01 = CT abdomen/pelvis
+99.05 = platelet transf
+99.07 = FFP transf
+99.19 = local anticoagulant injection
+44.13 = gastroscopy
+44.49 = control gastric hemorrage
+45.24 = endscopy large bowel
+45.33 = small bowel local excsion
+45.62 = small bowel resection
+46.51 = small bowel stoma closure
+48.33 = laser rectal polyps destruction
+48.36 = endscopic removal polpys rectum
+48.99 = rectal/perirectal procedures
+51.23 = lap chole
+54.59 = lapratomy
+54.91 = abdominal paracentesis
+88.42 = contrast angiogram
+
+```{r}
+bloodp <- as.character(c("9905","9907","9904"))
+
+large_b <- as.character(c("4524", "4573","1733","4525","4542","4523"))
+
+small_b <- as.character(c("4651","4562","4533","4514","4530","4519","4534","4513"))
+
+rectal_p <- as.character(c("4899","4836"))
+
+ogdsc <- as.character(c("4449","4413","4349","4530","4341","4443"))
+
+```
+
+
+```{r}
+
+
+df$bloodp <- with(df, ifelse((pr1 %in% bloodp | pr2 %in% bloodp | pr3 %in% bloodp | pr4 %in% bloodp | pr5 %in% bloodp), 1, 0))
+
+df %>% count(bloodp)
+
+df$large_b <- with(df, ifelse((pr1 %in% large_b | pr2 %in% large_b | pr3 %in% large_b | pr4 %in% large_b | pr5 %in% large_b), 1, 0))
+
+df %>% count(large_b)
+
+df$small_b <- with(df, ifelse((pr1 %in% small_b | pr2 %in% small_b | pr3 %in% small_b | pr4 %in% small_b | pr5 %in% small_b), 1, 0))
+
+df %>% count(small_b)
+
+df$rectal_p <- with(df, ifelse((pr1 %in% rectal_p | pr2 %in% rectal_p | pr3 %in% rectal_p | pr4 %in% rectal_p | pr5 %in% rectal_p), 1, 0))
+
+df %>% count(rectal_p)
+
+df$ogd <- with(df, ifelse((pr1 %in% ogdsc | pr2 %in% ogdsc | pr3 %in% ogdsc | pr4 %in% ogdsc | pr5 %in% ogdsc), 1, 0))
+
+df %>% count(ogd)
+
+open <- as.character(c("545","4562","4573","1733"))
+
+df$open <- with(df, ifelse((pr1 %in% open | pr2 %in% open | pr3 %in% open | pr4 %in% open | pr5 %in% open), 1, 0))
+
+df %>% count(open)
+
+
+df$proc <- with(df, ifelse((large_b == 1 | small_b == 1 | rectal_p == 1 | ogd == 1 | open == 1), 1, 0))
+
+df %>% count(proc)
+
+```
+
+
+```{r}
+# survey results for gi procedures in patients with gib:
+
+gibonly <- df %>%
+  filter(gib == 1) 
+  
+gisurvey <- gibonly %>% srvyr::as_survey_design(weight = discwt, strata = nis_stratum, id = hosp_nis, nest = T)
+
+gisurvey %>%
+  summarise(ogd = survey_mean(ogd))# upper gi scopy
+
+
+gisurvey %>%
+  summarise(large_b = survey_mean(large_b)) # large bowel 
+
+gisurvey %>%
+  summarise(small_b = survey_mean(small_b)) # small bowel 
+
+gisurvey %>%
+  summarise(rectal_p = survey_mean(rectal_p)) # rectal procedures
+
+
+gisurvey %>%
+  summarise(open = survey_mean(open))
+
+gisurvey %>%
+  summarise(proc = survey_mean(proc))
+
+
+gisurvey %>%
+  group_by(year_n) %>%
+  summarise(procedure = survey_mean(proc))
+
+
+```
+
+Am going to join the corresponding c-c files to obtain cost for each year and then use that for survey analysis.
+
+```{r getting cost files }
+
+# year 2010
+
+df2010 <- df %>%
+  filter(year_n == 2010)
+
+cc2010 <- read_csv("G:/cc_nis/cc2010NIS.csv")
+
+cc2010$hosp_nis <- cc2010$hospid 
+
+
+df2010_2 <- left_join(df2010, cc2010, by = "hosp_nis")
+
+df2010_2$apicc <- as.numeric(df2010_2$apicc)
+
+df2010_2 <- df2010_2 %>% mutate(charges = totchg*apicc)
+
+summary(df2010_2$charges)
+
+```
+
+
+```{r}
+# year 2011
+
+df2011 <- df %>%
+  filter(year_n == 2011)
+
+cc2011 <- read_csv("G:/cc_nis/cc2011NIS.csv")
+
+cc2011 <- cc2011 %>% rename(hosp_nis = hospid) 
+
+
+df2011_2 <- left_join(df2011, cc2011, by = "hosp_nis")
+
+
+df2011_2$apicc <- as.numeric(df2011_2$apicc)
+
+df2011_2 <- df2011_2 %>% mutate(charges = totchg*apicc)
+
+summary(df2011_2$charges)
+
+
+```
+
+
+```{r}
+# year 2012
+
+df2012 <- df %>%
+  filter(year_n == 2012)
+
+cc2012 <- read_csv("G:/cc_nis/cc2012nis.csv")
+
+cc2012$hosp_nis <- as.numeric(cc2012$hosp_nis)
+
+df2012_2 <- left_join(df2012, cc2012, by = "hosp_nis")
+
+df2012_2$ccr_nis <- as.numeric(df2012_2$ccr_nis)
+
+df2012_2 <- df2012_2 %>% mutate(charges = totchg*ccr_nis)
+
+summary(df2011_2$charges)
+```
+
+
+
+```{r}
+# year 2013
+
+df2013 <- df %>%
+  filter(year_n == 2013)
+
+cc2013 <- read_csv("G:/cc_nis/cc2013NIS.csv")
+
+ cc2013$hosp_nis <- as.numeric(cc2013$hosp_nis)
+
+df2013_2 <- left_join(df2013, cc2013, by = "hosp_nis")
+
+df2013_2$ccr_nis <- as.numeric(df2013_2$ccr_nis)
+
+df2013_2 <- df2013_2 %>% mutate(charges = totchg*ccr_nis)
+
+summary(df2013_2$charges)
+```
+
+```{r}
+# year 2014
+
+df2014 <- df %>%
+  filter(year_n == 2014)
+
+cc2014 <- read_csv("G:/cc_nis/cc2014NIS.csv")
+
+df2014_2 <- left_join(df2014, cc2014, by = "hosp_nis")
+
+df2014_2$ccr_nis <- as.numeric(df2014_2$ccr_nis)
+
+df2014_2 <- df2014_2 %>% mutate(charges = totchg*ccr_nis)
+
+summary(df2014_2$charges)
+```
+
+```{r}
+# year 2015
+
+df2015 <- df %>%
+  filter(year_n == 2015)
+
+cc2015 <- read_csv("G:/cc_nis/cc2015NIS.csv")
+
+cc2015$hosp_nis <- as.numeric(cc2015$hosp_nis)
+
+df2015_2 <- left_join(df2015, cc2015, by = "hosp_nis")
+
+df2015_2$ccr_nis <- as.numeric(df2015_2$ccr_nis)
+
+df2015_2 <- df2015_2 %>% mutate(charges = totchg*ccr_nis)
+
+summary(df2015_2$charges)
+```
+
+
+```{r}
+# saving dataframes for each year with cc file merged
+# saving the large df dataframe again with all variables included till now
+
+#write_csv(df, "G:/lvad_gib/data/dflarge.csv")
+
+#write_csv(df2010_2, "G:/lvad_gib/data/cc2010.csv")
+
+#write_csv(df2011_2, "G:/lvad_gib/data/cc2011.csv")
+
+#write_csv(df2012_2, "G:/lvad_gib/data/cc2012.csv")
+
+#write_csv(df2013_2, "G:/lvad_gib/data/cc2013.csv")
+
+#write_csv(df2014_2, "G:/lvad_gib/data/cc2014.csv")
+
+#write_csv(df2015_2, "G:/lvad_gib/data/cc2015.csv")
+```
+
+outcome in patients who needed procedure:
+
+```{r}
+
+# again create survey object for only gib patients
+
+gibonly <- df %>%
+  filter(gib == 1) 
+  
+gisurvey <- gibonly %>% srvyr::as_survey_design(weight = discwt, strata = nis_stratum, id = hosp_nis, nest = T)
+
+
+# create traditional survey object 
+
+gisurv <- survey::svydesign(data = gibonly, ids = ~hosp_nis, strata = ~nis_stratum, nest = T, weights = ~discwt)
+
+
+gisurvey %>%
+  group_by(proc) %>%
+  summarize(died = survey_mean(died))
+
+svychisq(~proc + died, design = gisurv)
+
+
+gisurvey %>%
+  group_by(proc) %>%
+  summarise(los = survey_mean(los))
+
+svyttest(los ~ proc, design = gisurv)
+```
+
+charges and comparison of charges for intervention and nonintervention cohorts:
+
+```{r}
+
+# charges for gib patients for each year
+
+
+
+options(survey.lonely.psu = "certainty")
+
+ch2010 <- 
+  df2010_2 %>%
+  filter(gib == 1) %>%
+  tidyr::drop_na(charges) %>%
+  srvyr::as_survey_design(weight = discwt, strata = nis_stratum, id = hosp_nis, nest = T) %>%
+  group_by(proc) %>%
+  summarise(charge = survey_mean(charges))
+
+ch2011 <-
+df2011_2 %>%
+  filter(gib == 1) %>%
+  tidyr::drop_na(charges) %>%
+  srvyr::as_survey_design(weight = discwt, strata = nis_stratum, id = hosp_nis, nest = T) %>%
+  group_by(proc) %>%
+  summarise(charge = survey_mean(charges))
+
+ch2012 <- 
+df2012_2 %>%
+  filter(gib == 1) %>%
+  tidyr::drop_na(charges) %>%
+  srvyr::as_survey_design(weight = discwt, strata = nis_stratum, id = hosp_nis, nest = T) %>%
+  group_by(proc) %>%
+  summarise(charge = survey_mean(charges))
+
+ch2013 <- 
+df2013_2 %>%
+  filter(gib == 1) %>%
+  tidyr::drop_na(charges) %>%
+  srvyr::as_survey_design(weight = discwt, strata = nis_stratum, id = hosp_nis, nest = T) %>%
+  group_by(proc) %>%
+  summarise(charge = survey_mean(charges))
+
+ch2014 <- 
+df2014_2 %>%
+  filter(gib == 1) %>%
+  tidyr::drop_na(charges) %>%
+  srvyr::as_survey_design(weight = discwt, strata = nis_stratum, id = hosp_nis, nest = T) %>%
+  group_by(proc) %>%
+  summarise(charge = survey_mean(charges))
+
+ch2015 <-
+df2015_2 %>%
+  filter(gib == 1) %>%
+  tidyr::drop_na(charges) %>%
+  srvyr::as_survey_design(weight = discwt, strata = nis_stratum, id = hosp_nis, nest = T) %>%
+  group_by(proc) %>%
+  summarise(charge = survey_mean(charges))
+
+
+totalc <- rbind(ch2010, ch2011, ch2012, ch2013, ch2014, ch2015)
+
+t.test(charge ~ proc, data = totalc)
+
+totalc %>%
+  filter(proc == 1) %>%
+  summarise(mean = mean(charge), std = 2*mean(charge_se))
+
+
+totalc %>%
+  filter(proc == 0) %>%
+  summarise(mean = mean(charge), std = 2*mean(charge_se))
+
+
+cost<- c(20261.74, 15688.68)
+sd <- c(5355.61, 8721.07)
+intervention <- c("yes","no")
+
+
+cost <- data.frame(intervention, cost, sd) %>% tbl_df()
+
+```
+
+
+
+
+
+logbinomial regression to determine adjusted risk ratio for various covariates to determine risk of gib:
+
+```{r}
+
+library(logbin)
+
+gib <- MASS::glm.nb(gib ~ age + race_n + insur + cm_chrnlung + af + cm_dm + cm_liver + cm_perivasc + cm_obese + cm_renlfail  , data = df)
+
+summary(gib)
+
+exp(coef(gib))
+
+exp(confint(gib))
+
+md <- broom::augment(gib)
+
+```
+
+```{r}
+md <- md %>%
+  mutate(prop = exp(.fitted)) 
+```
+
+
+
+```{r}
+# create graph for paper
+
+
+library(bbplot)
+library(ggthemes)
+
+age <- ggplot(data = md, aes(x = age, y = prop)) + geom_point(color = "lightgray")+ geom_smooth(color = "blue", fill = "black") + ggthemes::theme_economist_white()
+
+age2 <- age + ylim(0,1) + xlab("Age of LVAD supported patients (years)") + ylab("Adjusted Probability of GIB Admission")
+
+age2
+
+```
+
+
+
+```{r proportion undergoing intervention and procedures}
+
+inter <- c("Upper GI","Small Bowel","Colon")
+prop <- c(30,27.3,45.7)
+prop_u <- c(30 + 1.8, 27.3 + 2.4, 45.7 + 3.2)
+prop_l <- c(30 - 1.8, 27.3 - 2.4, 45.7 - 3.2)
+
+data <- data.frame(inter,prop,prop_u,prop_l) %>% tbl_df()
+
+
+int <- ggplot(data = data, aes(x = inter, y = prop)) + geom_bar(stat = "identity", color = "black",width = 0.5) + ylim(0,100) + theme_economist_white() + geom_errorbar(data = data, aes(ymin = prop, ymax = prop_u, width = 0.4)) 
+
+int2 <- int + xlab("Interventions/Procedures performed") + ylab("Percetage of GIB admissions")
+
+int3 <- int2 + geom_text(aes(y = prop + 6, label = prop)) + theme(axis.text.x = element_text(size = 8)) + theme(axis.text.y = element_text(size = 8))
+
+int3
+
+
+```
+
+```{r graph for costs}
+
+
+c <- ggplot(data  = cost, aes( x = intervention, y = cost)) + geom_bar(stat = "identity",color = "black", width = 0.3) + theme_economist_white() + geom_errorbar(data = cost, aes(ymin = cost, ymax = (cost + sd)), width = 0.1) 
+
+c1 <- c + xlab("Interventions/Procedure performed in GIB cohort") + ylab("Adjusted Costs for each Admission (Dollars)")
+
+c2 <- c1 + geom_text(data = cost, aes(y = (cost + sd) + 6, label = cost), vjust = -0.5) + theme(axis.text.x = element_text(size = 8)) + theme(axis.text.y = element_blank())
+
+```
+
+
+
+```{r arrange both into 1 frame}
+library(ggpubr)
+
+
+fig <- ggpubr::ggarrange(int3, age2, ncol = 2)
+
+fig
+
+ggsave(plot = fig,filename =  "G:/lvad_gib/data/figure.tiff", device = "tiff")
+
+```
+
