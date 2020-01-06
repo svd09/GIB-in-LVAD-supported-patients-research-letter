@@ -63,6 +63,7 @@ s10 <- read_sas("G:/nis_2010_severity.sas7bdat")
 names(s10) <- tolower(names(s10))
 
 # then we will only select "cm" variables and "nis_stratum".
+# this change has been made for testing only.
 
 s10_s <- s10 %>% select(key, cm_aids:cm_wghtloss)
 
